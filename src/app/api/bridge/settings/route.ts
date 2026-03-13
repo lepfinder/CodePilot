@@ -22,6 +22,12 @@ const BRIDGE_SETTING_KEYS = [
   'bridge_feishu_group_policy',
   'bridge_feishu_group_allow_from',
   'bridge_feishu_require_mention',
+  'bridge_wecom_enabled',
+  'bridge_wecom_bot_id',
+  'bridge_wecom_secret',
+  'bridge_wecom_allowed_users',
+  'bridge_wecom_group_policy',
+  'bridge_wecom_group_allow_from',
   'bridge_discord_enabled',
   'bridge_discord_bot_token',
   'bridge_discord_allowed_users',
@@ -47,7 +53,13 @@ export async function GET() {
   try {
     const settings: Record<string, string> = {};
     for (const key of BRIDGE_SETTING_KEYS) {
-      settings[key] = getSetting(key) ?? '';
+      const val = getSetting(key) ?? '';
+      // Masking secrets and tokens
+      if (val && (key.endsWith('secret') || key.endsWith('token'))) {
+        settings[key] = '********';
+      } else {
+        settings[key] = val;
+      }
     }
     return NextResponse.json({ settings });
   } catch {
@@ -72,6 +84,10 @@ export async function PUT(request: Request) {
 
     for (const [key, value] of Object.entries(settings)) {
       if (BRIDGE_SETTING_KEYS.includes(key as typeof BRIDGE_SETTING_KEYS[number])) {
+        // If the value is the mask, do not overwrite the existing real secret
+        if (value === '********' && (key.endsWith('secret') || key.endsWith('token'))) {
+          continue;
+        }
         setSetting(key, String(value));
       }
     }
