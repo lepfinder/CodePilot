@@ -394,6 +394,7 @@ export function streamClaude(options: ClaudeStreamOptions): ReadableStream<strin
       const resolved = resolveForClaudeCode(options.provider, {
         providerId: options.providerId,
         sessionProviderId: options.sessionProviderId,
+        model: options.model,
       });
 
       try {
