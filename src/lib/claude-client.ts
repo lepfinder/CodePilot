@@ -694,7 +694,7 @@ export function streamClaude(options: ClaudeStreamOptions): ReadableStream<strin
                 })();
 
             const contentBlocks: Array<
-              | { type: 'image'; source: { type: 'base64'; media_type: string; data: string } }
+              | { type: 'image'; source: { type: 'base64'; media_type: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp'; data: string } }
               | { type: 'text'; text: string }
             > = [];
 
@@ -703,7 +703,7 @@ export function streamClaude(options: ClaudeStreamOptions): ReadableStream<strin
                 type: 'image',
                 source: {
                   type: 'base64',
-                  media_type: img.type || 'image/png',
+                  media_type: (img.type || 'image/png') as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp',
                   data: img.data,
                 },
               });
@@ -845,8 +845,8 @@ export function streamClaude(options: ClaudeStreamOptions): ReadableStream<strin
                       ? block.content
                       : Array.isArray(block.content)
                         ? block.content
-                            .filter((c: { type: string }) => c.type === 'text')
-                            .map((c: { text: string }) => c.text)
+                            .filter((c: any) => c.type === 'text')
+                            .map((c: any) => c.text)
                             .join('\n')
                         : String(block.content ?? '');
                     controller.enqueue(formatSSE({
